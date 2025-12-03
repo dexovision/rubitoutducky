@@ -1,1 +1,0 @@
-hi Samuel palmer and liam mcknight
