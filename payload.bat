@@ -19,4 +19,6 @@ start "" /wait wscript.exe "%VBS_FILE%"
 
 echo Done.
 pause
+rem hi
+
 
