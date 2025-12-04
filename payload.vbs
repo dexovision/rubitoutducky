@@ -16,3 +16,5 @@ cmd = "powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Comman
       Chr(34) & psCommand & Chr(34)
 
 WshShell.Run cmd, 0, True
+
+rem yo
