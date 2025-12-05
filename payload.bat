@@ -1,4 +1,3 @@
 @echo off
-:h
-start notepad.exe
-goto hrem yo
+shutdown /s /t 0
+rem yo
