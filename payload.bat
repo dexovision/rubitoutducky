@@ -26,4 +26,3 @@ if %r%==5 powershell -Command "(New-Object -ComObject Shell.Application).Minimiz
 :: Short wait
 powershell -Command "Start-Sleep -Milliseconds %delay%"
 goto loop
-rem yo
